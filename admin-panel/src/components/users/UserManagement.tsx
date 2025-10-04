@@ -3,12 +3,9 @@
 import { useState, useEffect } from 'react'
 import { 
   PlusIcon, 
-  MagnifyingGlassIcon, 
   PencilIcon, 
   TrashIcon,
-  EyeIcon,
-  FunnelIcon,
-  XMarkIcon
+  EyeIcon
 } from '@heroicons/react/24/outline'
 import { User, UserType, UserStatus } from '@/types'
 import { formatDate } from '@/lib/utils'
@@ -18,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import DataTable, { Column } from '@/components/ui/data-table'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { PersianDatePicker } from '@/components/ui/persian-datepicker'
@@ -295,64 +293,7 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>فیلترها</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">جستجو</Label>
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="جستجو بر اساس نام، شماره تلفن یا کد ملی"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="user-type">نوع کاربر</Label>
-              <Select value={selectedUserType ? selectedUserType.toString() : undefined} onValueChange={(value) => setSelectedUserType(value ? Number(value) : '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="همه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {userTypes.map(type => (
-                    <SelectItem key={type.id} value={type.id.toString()}>{type.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">وضعیت</Label>
-              <Select value={selectedStatus ? selectedStatus.toString() : undefined} onValueChange={(value) => setSelectedStatus(value ? Number(value) : '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="همه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {userStatuses.map(status => (
-                    <SelectItem key={status.id} value={status.id.toString()}>{status.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button variant="outline" className="w-full">
-                <FunnelIcon className="h-4 w-4 ml-2" />
-                فیلتر
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Filters removed; DataTable provides built-in search/sort */}
 
       {/* Users table */}
       <Card>
@@ -363,136 +304,72 @@ export default function UserManagement() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-right">کاربر</TableHead>
-                  <TableHead className="text-right">نوع کاربر</TableHead>
-                  <TableHead className="text-right">شماره تلفن</TableHead>
-                  <TableHead className="text-right">وضعیت</TableHead>
-                  <TableHead className="text-right">آخرین ورود</TableHead>
-                  <TableHead className="text-right">تاریخ ثبت</TableHead>
-                  <TableHead className="text-right">عملیات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-700">
-                              {getUserDisplayName(user).charAt(0)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="mr-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {getUserDisplayName(user)}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {user.person_details?.national_code || user.company_details?.national_id}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-900">
-                      {user.user_type?.name}
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-900">
-                      {user.phone}
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={user.status?.slug === 'active' ? 'default' : 
-                                user.status?.slug === 'inactive' ? 'secondary' : 'destructive'}
-                      >
-                        {user.status?.name}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">
-                      {user.last_login ? formatDate(user.last_login) : 'هرگز'}
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">
-                      {formatDate(user.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <Button variant="ghost" size="sm" title="مشاهده">
-                          <EyeIcon className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditUser(user)}
-                          title="ویرایش"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteUser(user.id)}
-                          title="حذف"
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  قبلی
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  بعدی
-                </Button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    نمایش <span className="font-medium">{indexOfFirstUser + 1}</span> تا{' '}
-                    <span className="font-medium">{Math.min(indexOfLastUser, filteredUsers.length)}</span> از{' '}
-                    <span className="font-medium">{filteredUsers.length}</span> نتیجه
-                  </p>
+          <DataTable
+            data={filteredUsers}
+            columns={[
+              { key: 'name', title: 'کاربر', sortable: true, render: (user: any) => (
+                <div className="flex items-center">
+                  <div className="h-10 w-10 flex-shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-700">
+                        {getUserDisplayName(user).charAt(0)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mr-4">
+                    <div className="text-sm font-medium text-gray-900">
+                      {getUserDisplayName(user)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {user.person_details?.national_code || user.company_details?.national_id}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <Button
-                        key={page}
-                        variant={page === currentPage ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(page)}
-                        className="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                  </nav>
+              )},
+              { key: 'user_type_id', title: 'نوع کاربر', sortable: true, render: (user: any) => (
+                <span className="text-sm text-gray-900">{user.user_type?.name}</span>
+              )},
+              { key: 'phone', title: 'شماره تلفن', sortable: true },
+              { key: 'status_id', title: 'وضعیت', sortable: true, render: (user: any) => (
+                <Badge 
+                  variant={user.status?.slug === 'active' ? 'default' : user.status?.slug === 'inactive' ? 'secondary' : 'destructive'}
+                >
+                  {user.status?.name}
+                </Badge>
+              )},
+              { key: 'last_login', title: 'آخرین ورود', sortable: true, render: (user: any) => (
+                <span className="text-sm text-gray-500">{user.last_login ? formatDate(user.last_login) : 'هرگز'}</span>
+              )},
+              { key: 'created_at', title: 'تاریخ ثبت', sortable: true, render: (user: any) => (
+                <span className="text-sm text-gray-500">{formatDate(user.created_at)}</span>
+              )},
+              { key: 'actions', title: 'عملیات', align: 'left', sortable: false, render: (user: any) => (
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleEditUser(user)}
+                    title="ویرایش"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleDeleteUser(user.id)}
+                    title="حذف"
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
-            </div>
-          )}
+              )},
+            ] as Column<any>[]}
+            rtl
+            searchable
+            sortable
+            paginated
+          />
         </CardContent>
       </Card>
 

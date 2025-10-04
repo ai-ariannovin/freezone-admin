@@ -54,6 +54,11 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  // Determine layout direction from explicit prop or document <html dir>
+  // @ts-expect-error - dir may be provided at usage sites
+  const explicitDir: string | undefined = props?.dir
+  const isRtl = explicitDir === 'rtl' || (typeof document !== 'undefined' && document?.documentElement?.getAttribute('dir') === 'rtl')
+  const closePosClass = isRtl ? 'left-4' : 'right-4'
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -69,7 +74,10 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className={cn(
+              "ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+              closePosClass
+            )}
           >
             <XIcon />
             <span className="sr-only">Close</span>
@@ -84,7 +92,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-2 text-right sm:text-right", className)}
       {...props}
     />
   )

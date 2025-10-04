@@ -11,7 +11,8 @@ import {
   UsersIcon,
   KeyIcon,
   XMarkIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArrowsUpDownIcon
 } from '@heroicons/react/24/outline'
 import { Role, Permission, PermissionCategory } from '@/types'
 import { formatDate } from '@/lib/utils'
@@ -20,8 +21,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import Dropdown, { DropdownOption } from '@/components/ui/dropdown'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import DataTable, { Column } from '@/components/ui/data-table'
+import RolesTable, { RoleLite } from '@/components/roles/tables/RolesTable'
+import PermissionsTable, { PermissionLite } from '@/components/roles/tables/PermissionsTable'
+import CategoriesTable, { CategoryLite } from '@/components/roles/tables/CategoriesTable'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import UpsertEntityModal, { UpsertEntityFormData } from '@/components/roles/modals/UpsertEntityModal'
+import DeleteConfirmModal from '@/components/roles/modals/DeleteConfirmModal'
+import AssignPermissionsModal from '@/components/roles/modals/AssignPermissionsModal'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -77,7 +86,7 @@ const mockPermissions: Permission[] = [
 ]
 
 const mockPermissionCategories: PermissionCategory[] = [
-  { id: 1, title: 'مدیریت کاربران', name: 'user_management', created_at: '2025-09-22 06:42:40', updated_at: '2025-09-22 06:42:40' },
+  { id: 1, title: 'مدیریت کاربران و تنظیمات پیشرفته کاربران با عنوان خیلی خیلی طولانی برای تست نمایش دراپ‌دان و رفتار برش متن در لیست گزینه‌ها', name: 'user_management', created_at: '2025-09-22 06:42:40', updated_at: '2025-09-22 06:42:40' },
   { id: 2, title: 'مدیریت نقش ها و دسترسی ها', name: 'role_permission_management', created_at: '2025-09-22 06:42:40', updated_at: '2025-09-22 06:42:40' },
   { id: 3, title: 'مدیریت مجوز ها', name: 'license_management', created_at: '2025-09-22 06:42:40', updated_at: '2025-09-22 06:42:40' },
   { id: 4, title: 'مدیریت کاربران و مناطق آزاد', name: 'user_freezone_management', created_at: '2025-09-22 06:42:40', updated_at: '2025-09-22 06:42:40' }
@@ -90,6 +99,8 @@ export default function RoleManagement() {
   const [filteredRoles, setFilteredRoles] = useState<Role[]>(mockRoles)
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(mockPermissions)
   const [filteredCategories, setFilteredCategories] = useState<PermissionCategory[]>(mockPermissionCategories)
+  const [sortBy, setSortBy] = useState<string>('created_at')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('')
   const [activeTab, setActiveTab] = useState<'roles' | 'permissions' | 'categories'>('roles')
@@ -100,8 +111,11 @@ export default function RoleManagement() {
   const [selectedItem, setSelectedItem] = useState<Role | Permission | PermissionCategory | null>(null)
   const [selectedRoleForAssign, setSelectedRoleForAssign] = useState<Role | null>(null)
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([])
+  // Pagination for roles list (to match the reference UI)
+  const [rolesPage, setRolesPage] = useState<number>(1)
+  const [perPageRoles, setPerPageRoles] = useState<number>(10)
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UpsertEntityFormData>({
     name: '',
     slug: '',
     description: '',
@@ -109,6 +123,14 @@ export default function RoleManagement() {
     permission_category_id: 1,
     model: ''
   })
+  // پیام‌های فارسی اعتبارسنجی برای ورودی‌های اجباری
+  const requiredMessage = 'پر کردن این فیلد الزامی است'
+  const handleInvalid = (e: React.InvalidEvent<HTMLInputElement>) => {
+    e.currentTarget.setCustomValidity(requiredMessage)
+  }
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    e.currentTarget.setCustomValidity('')
+  }
 
   useEffect(() => {
     let filtered: any[] = []
@@ -117,11 +139,25 @@ export default function RoleManagement() {
     if (activeTab === 'categories') filtered = permissionCategories
 
     if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
+      const term = searchTerm.toLowerCase()
+      if (activeTab === 'categories') {
+        filtered = filtered.filter((item: PermissionCategory) =>
+          item.title.toLowerCase().includes(term) ||
+          item.name.toLowerCase().includes(term)
+        )
+      } else if (activeTab === 'roles') {
+        filtered = filtered.filter((item: Role) =>
+          item.name.toLowerCase().includes(term) ||
+          item.slug.toLowerCase().includes(term) ||
+          (item.description && item.description.toLowerCase().includes(term))
+        )
+      } else {
+        filtered = filtered.filter((item: Permission) =>
+          item.name.toLowerCase().includes(term) ||
+          item.slug.toLowerCase().includes(term) ||
+          (item.description && item.description.toLowerCase().includes(term))
+        )
+      }
     }
 
     if (activeTab === 'permissions' && selectedCategory) {
@@ -130,6 +166,19 @@ export default function RoleManagement() {
       )
     }
 
+    // sort
+    const compare = (a: any, b: any) => {
+      const dir = sortDir === 'asc' ? 1 : -1
+      const av = (a as any)[sortBy]
+      const bv = (b as any)[sortBy]
+      if (av == null && bv == null) return 0
+      if (av == null) return 1
+      if (bv == null) return -1
+      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir
+      return String(av).localeCompare(String(bv)) * dir
+    }
+    filtered = [...filtered].sort(compare)
+
     if (activeTab === 'roles') {
       setFilteredRoles(filtered as Role[])
     } else if (activeTab === 'permissions') {
@@ -137,7 +186,7 @@ export default function RoleManagement() {
     } else {
       setFilteredCategories(filtered as PermissionCategory[])
     }
-  }, [roles, permissions, permissionCategories, searchTerm, selectedCategory, activeTab])
+  }, [roles, permissions, permissionCategories, searchTerm, selectedCategory, activeTab, sortBy, sortDir])
 
   const handleDeleteRole = (id: number) => {
     const role = roles.find(r => r.id === id)
@@ -184,7 +233,7 @@ export default function RoleManagement() {
       description: permission.description || '',
       level: 1,
       permission_category_id: permission.permission_category_id,
-      model: permission.model
+      model: permission.model || ''
     })
     setShowEditModal(true)
   }
@@ -279,8 +328,9 @@ export default function RoleManagement() {
     } else {
       // Add new item
       if (activeTab === 'roles') {
+        const newRoleId = roles.length ? Math.max(...roles.map(r => r.id)) + 1 : 1
         const newRole: Role = {
-          id: Math.max(...roles.map(r => r.id)) + 1,
+          id: newRoleId,
           name: formData.name,
           slug: formData.slug,
           description: formData.description,
@@ -290,8 +340,9 @@ export default function RoleManagement() {
         }
         setRoles([...roles, newRole])
       } else if (activeTab === 'permissions') {
+        const newPermissionId = permissions.length ? Math.max(...permissions.map(p => p.id)) + 1 : 1
         const newPermission: Permission = {
-          id: Math.max(...permissions.map(p => p.id)) + 1,
+          id: newPermissionId,
           name: formData.name,
           slug: formData.slug,
           description: formData.description,
@@ -302,8 +353,9 @@ export default function RoleManagement() {
         }
         setPermissions([...permissions, newPermission])
       } else {
+        const newCategoryId = permissionCategories.length ? Math.max(...permissionCategories.map(c => c.id)) + 1 : 1
         const newCategory: PermissionCategory = {
-          id: Math.max(...permissionCategories.map(c => c.id)) + 1,
+          id: newCategoryId,
           title: formData.description || formData.name,
           name: formData.name,
           created_at: new Date().toISOString(),
@@ -349,7 +401,9 @@ export default function RoleManagement() {
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <Button onClick={handleAdd}>
             <PlusIcon className="h-4 w-4 ml-2" />
-            {activeTab === 'roles' ? 'افزودن نقش' : 'افزودن مجوز'}
+            {activeTab === 'roles' ? 'افزودن نقش' : 
+             activeTab === 'permissions' ? 'افزودن دسترسی' : 
+             'افزودن گروه'}
           </Button>
         </div>
       </div>
@@ -367,63 +421,12 @@ export default function RoleManagement() {
           </TabsTrigger>
           <TabsTrigger value="categories" className="flex items-center">
             <UsersIcon className="h-4 w-4 ml-2" />
-            دسته‌بندی مجوزها
+            گروه‌بندی دسترسی‌ها
           </TabsTrigger>
         </TabsList>
 
         {/* Filters */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>فیلترها</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="search">جستجو</Label>
-                <div className="relative">
-                  <MagnifyingGlassIcon className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder={activeTab === 'roles' ? 'جستجو در نقش‌ها' : 'جستجو در دسترسی‌ها'}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pr-10"
-                  />
-                </div>
-              </div>
-
-              {activeTab === 'permissions' && (
-                <div className="space-y-2">
-                  <Label htmlFor="category">دسته‌بندی</Label>
-                  <Select value={selectedCategory ? selectedCategory.toString() : undefined} onValueChange={(value) => setSelectedCategory(value ? Number(value) : '')}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="همه" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {permissionCategories.map(category => (
-                        <SelectItem key={category.id} value={category.id.toString()}>{category.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <div className="flex items-end">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setSearchTerm('')
-                    setSelectedCategory('')
-                  }}
-                >
-                  <FunnelIcon className="h-4 w-4 ml-2" />
-                  پاک کردن فیلترها
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* فیلتر جداگانه حذف شد */}
 
         {/* Content */}
         <TabsContent value="roles">
@@ -435,87 +438,12 @@ export default function RoleManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">نقش</TableHead>
-                      <TableHead className="text-right">سطح</TableHead>
-                      <TableHead className="text-right">توضیحات</TableHead>
-                      <TableHead className="text-right">تاریخ ایجاد</TableHead>
-                      <TableHead className="text-right">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRoles.map((role) => (
-                      <TableRow key={role.id}>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <ShieldCheckIcon className="h-6 w-6 text-indigo-600" />
-                              </div>
-                            </div>
-                            <div className="mr-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {role.name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {role.slug}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            سطح {role.level}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {role.description}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-500">
-                          {formatDate(role.created_at)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            <Button variant="ghost" size="sm" title="مشاهده">
-                              <EyeIcon className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => openAssignPermissions(role)}
-                              title="انتساب دسترسی"
-                            >
-                              <KeyIcon className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditRole(role)}
-                              title="ویرایش"
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteRole(role.id)}
-                              title="حذف"
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <RolesTable
+                data={filteredRoles as unknown as RoleLite[]}
+                onAssign={openAssignPermissions as any}
+                onEdit={handleEditRole as any}
+                onDelete={handleDeleteRole}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -529,83 +457,12 @@ export default function RoleManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">دسترسی</TableHead>
-                      <TableHead className="text-right">دسته‌بندی</TableHead>
-                      <TableHead className="text-right">مدل</TableHead>
-                      <TableHead className="text-right">توضیحات</TableHead>
-                      <TableHead className="text-right">تاریخ ایجاد</TableHead>
-                      <TableHead className="text-right">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPermissions.map((permission) => (
-                      <TableRow key={permission.id}>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                                <KeyIcon className="h-6 w-6 text-green-600" />
-                              </div>
-                            </div>
-                            <div className="mr-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {permission.name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {permission.slug}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {permissionCategories.find(cat => cat.id === permission.permission_category_id)?.title}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-900">
-                          {permission.model}
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {permission.description}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-500">
-                          {formatDate(permission.created_at)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            <Button variant="ghost" size="sm" title="مشاهده">
-                              <EyeIcon className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditPermission(permission)}
-                              title="ویرایش"
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeletePermission(permission.id)}
-                              title="حذف"
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <PermissionsTable
+                data={filteredPermissions as unknown as PermissionLite[]}
+                categories={permissionCategories.map(c => ({ id: c.id, title: c.title })) as any}
+                onEdit={handleEditPermission as any}
+                onDelete={handleDeletePermission}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -613,262 +470,64 @@ export default function RoleManagement() {
         <TabsContent value="categories">
           <Card>
             <CardHeader>
-              <CardTitle>لیست دسته‌بندی‌های دسترسی</CardTitle>
+              <CardTitle>لیست گروه‌بندی دسترسی‌ها</CardTitle>
               <CardDescription>
-                مدیریت دسته‌بندی‌های دسترسی (permission_categories)
+                مدیریت گروه‌بندی دسترسی‌ها (permission_categories)
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">عنوان</TableHead>
-                      <TableHead className="text-right">نام (name)</TableHead>
-                      <TableHead className="text-right">تاریخ ایجاد</TableHead>
-                      <TableHead className="text-right">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCategories.map((category) => (
-                      <TableRow key={category.id}>
-                        <TableCell>
-                          <div className="text-sm font-medium text-gray-900">{category.title}</div>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-900">{category.name}</TableCell>
-                        <TableCell className="text-sm text-gray-500">{formatDate(category.created_at)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            <Button variant="ghost" size="sm" onClick={() => handleEditCategory(category)} title="ویرایش">
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDeleteCategory(category.id)} title="حذف" className="text-red-600 hover:text-red-900">
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <CategoriesTable
+                data={filteredCategories as unknown as CategoryLite[]}
+                onEdit={handleEditCategory as any}
+                onDelete={handleDeleteCategory}
+              />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Add/Edit Modal */}
-      <Dialog open={showAddModal || showEditModal} onOpenChange={(open) => {
-        if (!open) {
-          setShowAddModal(false)
-          setShowEditModal(false)
-          setSelectedItem(null)
-          resetForm()
-        }
-      }}>
-        <DialogContent className="sm:max-w-[425px]" onEscapeKeyDown={() => {
-          setShowAddModal(false)
-          setShowEditModal(false)
-          setSelectedItem(null)
-          resetForm()
-        }}>
-          <DialogHeader className="text-right">
-            <DialogTitle>
-              {showAddModal ? `افزودن ${activeTab === 'roles' ? 'نقش' : 'دسترسی'} جدید` : `ویرایش ${activeTab === 'roles' ? 'نقش' : 'دسترسی'}`}
-            </DialogTitle>
-            <DialogDescription>
-              {showAddModal ? `اطلاعات ${activeTab === 'roles' ? 'نقش' : 'دسترسی'} جدید را وارد کنید` : `اطلاعات ${activeTab === 'roles' ? 'نقش' : 'دسترسی'} را ویرایش کنید`}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">نام *</Label>
-              <Input
-                id="name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
+      <UpsertEntityModal
+        open={showAddModal || showEditModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowAddModal(false)
+            setShowEditModal(false)
+            setSelectedItem(null)
+            resetForm()
+          }
+        }}
+        mode={showAddModal ? 'add' : 'edit'}
+        activeTab={activeTab}
+        formData={formData}
+        setFormData={setFormData}
+        permissionCategories={permissionCategories.map(c => ({ id: c.id, title: c.title }))}
+        onSubmit={handleSubmit}
+        onCancel={() => {
+          setShowAddModal(false); setShowEditModal(false); setSelectedItem(null); resetForm()
+        }}
+        handleInvalid={handleInvalid}
+        handleInput={handleInput}
+      />
 
-            <div className="space-y-2">
-              <Label htmlFor="slug">شناسه *</Label>
-              <Input
-                id="slug"
-                required
-                placeholder="user.create"
-                value={formData.slug}
-                onChange={(e) => setFormData({...formData, slug: e.target.value})}
-              />
-            </div>
+      <DeleteConfirmModal
+        open={showDeleteModal}
+        activeTab={activeTab}
+        name={selectedItem?.name}
+        loading={loading}
+        onCancel={() => { setShowDeleteModal(false); setSelectedItem(null) }}
+        onConfirm={confirmDelete}
+        onOpenChange={(open) => { if (!open) { setShowDeleteModal(false); setSelectedItem(null) }}}
+      />
 
-            <div className="space-y-2">
-              <Label htmlFor="description">توضیحات</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-              />
-            </div>
-
-            {activeTab === 'roles' && (
-              <div className="space-y-2">
-                <Label htmlFor="level">سطح *</Label>
-                <Select value={formData.level.toString()} onValueChange={(value) => setFormData({...formData, level: parseInt(value)})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">سطح 1</SelectItem>
-                    <SelectItem value="2">سطح 2</SelectItem>
-                    <SelectItem value="3">سطح 3</SelectItem>
-                    <SelectItem value="4">سطح 4</SelectItem>
-                    <SelectItem value="5">سطح 5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {activeTab === 'permissions' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="permission_category_id">دسته‌بندی *</Label>
-                  <Select value={formData.permission_category_id.toString()} onValueChange={(value) => setFormData({...formData, permission_category_id: parseInt(value)})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {permissionCategories.map(category => (
-                        <SelectItem key={category.id} value={category.id.toString()}>{category.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="model">مدل *</Label>
-                  <Input
-                    id="model"
-                    required
-                    placeholder="User"
-                    value={formData.model}
-                    onChange={(e) => setFormData({...formData, model: e.target.value})}
-                  />
-                </div>
-              </>
-            )}
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowAddModal(false)
-                  setShowEditModal(false)
-                  setSelectedItem(null)
-                  resetForm()
-                }}
-              >
-                انصراف
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? 'در حال ذخیره...' : (showAddModal ? 'افزودن' : 'ویرایش')}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Modal */}
-      <Dialog open={showDeleteModal} onOpenChange={(open) => {
-        if (!open) {
-          setShowDeleteModal(false)
-          setSelectedItem(null)
-        }
-      }}>
-        <DialogContent className="sm:max-w-[425px]" onEscapeKeyDown={() => {
-          setShowDeleteModal(false)
-          setSelectedItem(null)
-        }}>
-          <DialogHeader className="text-right">
-            <DialogTitle>تأیید حذف</DialogTitle>
-            <DialogDescription>
-              آیا مطمئن هستید که می‌خواهید {activeTab === 'roles' ? 'نقش' : 'دسترسی'} <strong>{selectedItem?.name}</strong> را حذف کنید؟
-              <br />
-              <span className="text-red-600 text-sm">این عمل قابل بازگشت نیست.</span>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowDeleteModal(false)
-                setSelectedItem(null)
-              }}
-            >
-              انصراف
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              disabled={loading}
-            >
-              {loading ? 'در حال حذف...' : 'حذف'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Assign Permissions Modal */}
-      <Dialog open={showAssignModal} onOpenChange={(open) => {
-        if (!open) {
-          setShowAssignModal(false)
-          setSelectedRoleForAssign(null)
-          setSelectedPermissionIds([])
-        }
-      }}>
-        <DialogContent className="sm:max-w-[700px]"><DialogHeader className="text-right">
-          <DialogTitle>انتساب دسترسی‌ها به نقش {selectedRoleForAssign?.name}</DialogTitle>
-          <DialogDescription>دسترسی‌های مورد نظر را انتخاب کنید</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-          {permissionCategories.map(category => (
-            <div key={category.id} className="border rounded-md p-3">
-              <div className="font-medium mb-2">{category.title}</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {permissions.filter(p => p.permission_category_id === category.id).map(p => {
-                  const checked = selectedPermissionIds.includes(p.id)
-                  return (
-                    <label key={p.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => {
-                          setSelectedPermissionIds(prev => checked ? prev.filter(id => id !== p.id) : [...prev, p.id])
-                        }}
-                      />
-                      <span className="text-sm">{p.name} <span className="text-xs text-gray-500">({p.slug})</span></span>
-                    </label>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => {
-            setShowAssignModal(false)
-            setSelectedRoleForAssign(null)
-            setSelectedPermissionIds([])
-          }}>انصراف</Button>
-          <Button onClick={() => {
-            // در حالت mock این تنظیمات را فقط در حافظه نگه می‌داریم
-            // در اتصال واقعی، اینجا API: POST /roles/{id}/permissions
-            setShowAssignModal(false)
-          }}>ذخیره</Button>
-        </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AssignPermissionsModal
+        open={showAssignModal}
+        role={selectedRoleForAssign}
+        categories={permissionCategories.map(c => ({ id: c.id, title: c.title }))}
+        permissions={permissions.map(p => ({ id: p.id, name: p.name, slug: p.slug, permission_category_id: p.permission_category_id }))}
+        selectedPermissionIds={selectedPermissionIds}
+        setSelectedPermissionIds={setSelectedPermissionIds}
+        onClose={() => { setShowAssignModal(false); setSelectedRoleForAssign(null); setSelectedPermissionIds([]) }}
+      />
     </div>
   )
 }

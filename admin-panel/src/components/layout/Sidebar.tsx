@@ -67,7 +67,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative mr-auto flex h-full w-full max-w-xs flex-1">
+              <Dialog.Panel className="relative mr-auto flex h-full w-full max-w-xs flex-1 drop-shadow-2xl">
                 <Transition.Child
                   as={Fragment}
                   enter="ease-in-out duration-300"
@@ -89,8 +89,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                     </button>
                   </div>
                 </Transition.Child>
-                <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-                  <div className="flex h-16 shrink-0 items-center">
+                <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 ring-1 ring-gray-200 px-6 pb-4">
+                  <div className="flex h-16 shrink-0 items-center border-b border-gray-100">
                     <h1 className="text-xl font-bold text-gray-900">پنل ادمین</h1>
                   </div>
                   <nav className="flex flex-1 flex-col">
@@ -103,11 +103,14 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                                 href={item.href}
                                 className={cn(
                                   pathname === item.href
-                                    ? 'bg-gray-50 text-indigo-600'
-                                    : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                  'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                    ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100'
+                                    : 'text-gray-700 hover:text-indigo-700 hover:bg-gray-50',
+                                  'group relative flex gap-x-3 rounded-lg p-2 text-sm leading-6 font-semibold transition-colors'
                                 )}
                               >
+                                {pathname === item.href && (
+                                  <span className="absolute right-0 top-0 h-full w-1 rounded-l-md bg-indigo-600" />
+                                )}
                                 <item.icon
                                   className={cn(
                                     pathname === item.href ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
@@ -132,8 +135,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
-          <div className="flex h-16 shrink-0 items-center">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-l border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 ring-1 ring-gray-100 px-6 pb-4 shadow-xl">
+          <div className="flex h-16 shrink-0 items-center border-b border-gray-100">
             <h1 className="text-xl font-bold text-gray-900">پنل ادمین</h1>
           </div>
           <nav className="flex flex-1 flex-col">
@@ -146,11 +149,14 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                         href={item.href}
                         className={cn(
                           pathname === item.href
-                            ? 'bg-gray-50 text-indigo-600'
-                            : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                          'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                            ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100'
+                            : 'text-gray-700 hover:text-indigo-700 hover:bg-gray-50',
+                          'group relative flex gap-x-3 rounded-lg p-2 text-sm leading-6 font-semibold transition-colors'
                         )}
                       >
+                        {pathname === item.href && (
+                          <span className="absolute right-0 top-0 h-full w-1 rounded-l-md bg-indigo-600" />
+                        )}
                         <item.icon
                           className={cn(
                             pathname === item.href ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',

@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react'
 import { 
   PlusIcon, 
-  MagnifyingGlassIcon, 
   PencilIcon, 
   TrashIcon,
   EyeIcon,
-  FunnelIcon,
   DocumentTextIcon,
   ClockIcon,
   CheckCircleIcon,
@@ -24,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import DataTable, { Column } from '@/components/ui/data-table'
 
 // Mock data
 const mockLicenses: License[] = [
@@ -401,64 +400,7 @@ export default function LicenseManagement() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>فیلترها</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">جستجو</Label>
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="جستجو بر اساس کد یا عنوان مجوز"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="request-type">نوع درخواست</Label>
-              <Select value={selectedRequestType ? selectedRequestType.toString() : undefined} onValueChange={(value) => setSelectedRequestType(value ? Number(value) : '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="همه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {requestTypes.map(type => (
-                    <SelectItem key={type.id} value={type.id.toString()}>{type.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">وضعیت</Label>
-              <Select value={selectedStatus ? selectedStatus.toString() : undefined} onValueChange={(value) => setSelectedStatus(value ? Number(value) : '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="همه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {statuses.map(status => (
-                    <SelectItem key={status.id} value={status.id.toString()}>{status.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button variant="outline" className="w-full">
-                <FunnelIcon className="h-4 w-4 ml-2" />
-                فیلتر
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Filters removed; DataTable provides built-in search/sort */}
 
       {/* Licenses table */}
       <Card>
@@ -469,143 +411,61 @@ export default function LicenseManagement() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-right">مجوز</TableHead>
-                  <TableHead className="text-right">نوع درخواست</TableHead>
-                  <TableHead className="text-right">نسخه</TableHead>
-                  <TableHead className="text-right">مدت اعتبار</TableHead>
-                  <TableHead className="text-right">وضعیت</TableHead>
-                  <TableHead className="text-right">تاریخ ایجاد</TableHead>
-                  <TableHead className="text-right">عملیات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentLicenses.map((license) => (
-                  <TableRow key={license.id}>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                            <DocumentTextIcon className="h-6 w-6 text-indigo-600" />
-                          </div>
-                        </div>
-                        <div className="mr-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {license.license_title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {license.license_code}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-900">
-                      {license.request_type?.name}
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-900">
-                      v{license.license_version}
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-900">
-                      <div>
-                        <div className="text-sm">{license.validity_description}</div>
-                        <div className="text-xs text-gray-500">{license.duration_description}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        {getStatusIcon(license.status?.slug || '')}
-                        <Badge 
-                          variant={license.status?.slug === 'active' ? 'default' : 
-                                  license.status?.slug === 'inactive' ? 'secondary' : 'destructive'}
-                          className="mr-2"
-                        >
-                          {license.status?.name}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">
-                      {formatDate(license.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <Button variant="ghost" size="sm" title="مشاهده">
-                          <EyeIcon className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditLicense(license)}
-                          title="ویرایش"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteLicense(license.id)}
-                          title="حذف"
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  قبلی
-                </button>
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  بعدی
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    نمایش <span className="font-medium">{indexOfFirstLicense + 1}</span> تا{' '}
-                    <span className="font-medium">{Math.min(indexOfLastLicense, filteredLicenses.length)}</span> از{' '}
-                    <span className="font-medium">{filteredLicenses.length}</span> نتیجه
-                  </p>
+          <DataTable
+            data={filteredLicenses}
+            columns={[
+              { key: 'license_title', title: 'مجوز', sortable: true, render: (license: any) => (
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <DocumentTextIcon className="h-6 w-6 text-indigo-600" />
+                    </div>
+                  </div>
+                  <div className="mr-4">
+                    <div className="text-sm font-medium text-gray-900">{license.license_title}</div>
+                    <div className="text-sm text-gray-500">{license.license_code}</div>
+                  </div>
                 </div>
+              )},
+              { key: 'request_type_id', title: 'نوع درخواست', sortable: true, render: (l: any) => (
+                <span className="text-sm text-gray-900">{l.request_type?.name}</span>
+              )},
+              { key: 'license_version', title: 'نسخه', sortable: true, render: (l: any) => (
+                <span className="text-sm text-gray-900">v{l.license_version}</span>
+              )},
+              { key: 'validity_description', title: 'مدت اعتبار', sortable: true, render: (l: any) => (
                 <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          page === currentPage
-                            ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  </nav>
+                  <div className="text-sm">{l.validity_description}</div>
+                  <div className="text-xs text-gray-500">{l.duration_description}</div>
                 </div>
-              </div>
-            </div>
-          )}
+              )},
+              { key: 'status_id', title: 'وضعیت', sortable: true, render: (l: any) => (
+                <div className="flex items-center">
+                  {getStatusIcon(l.status?.slug || '')}
+                  <Badge variant={l.status?.slug === 'active' ? 'default' : l.status?.slug === 'inactive' ? 'secondary' : 'destructive'} className="mr-2">
+                    {l.status?.name}
+                  </Badge>
+                </div>
+              )},
+              { key: 'created_at', title: 'تاریخ ایجاد', sortable: true, render: (l: any) => (
+                <span className="text-sm text-gray-500">{formatDate(l.created_at)}</span>
+              )},
+              { key: 'actions', title: 'عملیات', align: 'left', sortable: false, render: (l: any) => (
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Button variant="ghost" size="sm" onClick={() => handleEditLicense(l)} title="ویرایش">
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteLicense(l.id)} title="حذف" className="text-red-600 hover:text-red-900">
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              )},
+            ] as Column<any>[]}
+            rtl
+            searchable
+            sortable
+            paginated
+          />
         </CardContent>
       </Card>
 
@@ -814,9 +674,8 @@ export default function LicenseManagement() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedLicense && (

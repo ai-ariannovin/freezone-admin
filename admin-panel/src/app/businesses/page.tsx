@@ -10,7 +10,7 @@ export default function BusinessesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <ProtectedRoute requiredPermissions={['businesses.view']}>
+    <ProtectedRoute requiredPermissions={['link.business.freezone']}>
       <div>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 

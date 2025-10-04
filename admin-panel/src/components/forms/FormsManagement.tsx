@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react'
 import { 
   PlusIcon, 
-  MagnifyingGlassIcon, 
   PencilIcon, 
   TrashIcon,
   EyeIcon,
-  FunnelIcon,
   ClipboardDocumentListIcon,
   DocumentTextIcon,
   CalendarIcon,
@@ -21,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import DataTable, { Column } from '@/components/ui/data-table'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 
@@ -399,228 +398,80 @@ export default function FormsManagement() {
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>فیلترها</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">جستجو</Label>
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="جستجو در نام یا توضیحات فرم"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="type">نوع فرم</Label>
-              <Select value={selectedType || undefined} onValueChange={(value) => setSelectedType(value || '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="همه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {formTypes.map(type => (
-                    <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">وضعیت</Label>
-              <Select value={selectedStatus || undefined} onValueChange={(value) => setSelectedStatus(value || '')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="همه" />
-                </SelectTrigger>
-                <SelectContent>
-                  {formStatuses.map(status => (
-                    <SelectItem key={status.id} value={status.id}>{status.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setSearchTerm('')
-                  setSelectedType('all')
-                  setSelectedStatus('all')
-                }}
-              >
-                <FunnelIcon className="h-4 w-4 ml-2" />
-                پاک کردن فیلترها
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Filters removed; DataTable provides built-in search/sort */}
 
       {/* Forms table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    فرم
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    نوع
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    نسخه
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    وضعیت
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    اعتبار
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    فیلدها
-                  </th>
-                  <th className="relative px-6 py-3">
-                    <span className="sr-only">عملیات</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentForms.map((form) => (
-                  <tr key={form.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                            {getTypeIcon(form.type)}
-                          </div>
-                        </div>
-                        <div className="mr-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {form.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {form.description}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getTypeName(form.type)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      v{form.version}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(form.status)}`}>
-                        {getStatusName(form.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center">
-                        {isFormValid(form) ? (
-                          <CheckCircleIcon className="h-4 w-4 text-green-500 ml-1" />
-                        ) : (
-                          <CalendarIcon className="h-4 w-4 text-red-500 ml-1" />
-                        )}
-                        <div>
-                          <div className="text-sm">{form.valid_from}</div>
-                          {form.valid_to && (
-                            <div className="text-xs text-gray-500">تا {form.valid_to}</div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {form.fields_count} فیلد
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <button className="text-indigo-600 hover:text-indigo-900" title="مشاهده">
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="text-indigo-600 hover:text-indigo-900"
-                          onClick={() => handleEditForm(form)}
-                          title="ویرایش"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-900"
-                          onClick={() => handleDeleteForm(form.id)}
-                          title="حذف"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  قبلی
-                </button>
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  بعدی
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    نمایش <span className="font-medium">{indexOfFirstForm + 1}</span> تا{' '}
-                    <span className="font-medium">{Math.min(indexOfLastForm, filteredForms.length)}</span> از{' '}
-                    <span className="font-medium">{filteredForms.length}</span> نتیجه
-                  </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>لیست کاربرگ‌ها</CardTitle>
+          <CardDescription>
+            مدیریت فرم‌ها و نسخه‌ها
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            data={filteredForms}
+            columns={[
+              { key: 'name', title: 'فرم', sortable: true, render: (form: any) => (
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                      {getTypeIcon(form.type)}
+                    </div>
+                  </div>
+                  <div className="mr-4">
+                    <div className="text-sm font-medium text-gray-900">{form.name}</div>
+                    <div className="text-sm text-gray-500">{form.description}</div>
+                  </div>
                 </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          page === currentPage
-                            ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  </nav>
+              )},
+              { key: 'type', title: 'نوع', sortable: true, render: (form: any) => (
+                <span className="text-sm text-gray-900">{getTypeName(form.type)}</span>
+              )},
+              { key: 'version', title: 'نسخه', sortable: true, render: (form: any) => (
+                <span className="text-sm text-gray-900">v{form.version}</span>
+              )},
+              { key: 'status', title: 'وضعیت', sortable: true, render: (form: any) => (
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(form.status)}`}>
+                  {getStatusName(form.status)}
+                </span>
+              )},
+              { key: 'valid_from', title: 'اعتبار', sortable: true, render: (form: any) => (
+                <div className="flex items-center">
+                  {isFormValid(form) ? (
+                    <CheckCircleIcon className="h-4 w-4 text-green-500 ml-1" />
+                  ) : (
+                    <CalendarIcon className="h-4 w-4 text-red-500 ml-1" />
+                  )}
+                  <div>
+                    <div className="text-sm">{form.valid_from}</div>
+                    {form.valid_to && (
+                      <div className="text-xs text-gray-500">تا {form.valid_to}</div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+              )},
+              { key: 'fields_count', title: 'فیلدها', sortable: true, render: (form: any) => (
+                <span className="text-sm text-gray-900">{form.fields_count} فیلد</span>
+              )},
+              { key: 'actions', title: 'عملیات', align: 'left', sortable: false, render: (form: any) => (
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <button className="text-indigo-600 hover:text-indigo-900" onClick={() => handleEditForm(form)} title="ویرایش">
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                  <button className="text-red-600 hover:text-red-900" onClick={() => handleDeleteForm(form.id)} title="حذف">
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              )},
+            ] as Column<any>[]}
+            rtl
+            searchable
+            sortable
+            paginated
+          />
+        </CardContent>
+      </Card>
 
       {/* Add/Edit Modal */}
       {(showAddModal || showEditModal) && (
