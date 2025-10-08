@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import DataTable, { Column } from '@/components/ui/data-table'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { PersianDatePicker } from '@/components/ui/persian-datepicker'
 
 interface Form {
   id: number
@@ -577,25 +578,23 @@ export default function FormsManagement() {
                   <label htmlFor="valid_from" className="block text-sm font-medium text-gray-700">
                     تاریخ شروع اعتبار *
                   </label>
-                  <input
-                    type="date"
-                    id="valid_from"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  <PersianDatePicker
                     value={formData.valid_from}
-                    onChange={(e) => setFormData({...formData, valid_from: e.target.value})}
+                    onChange={(date) => setFormData({...formData, valid_from: date || ''})}
+                    placeholder="تاریخ شروع اعتبار را انتخاب کنید"
+                    required
+                    className="mt-1"
                   />
                 </div>
                 <div>
                   <label htmlFor="valid_to" className="block text-sm font-medium text-gray-700">
                     تاریخ پایان اعتبار
                   </label>
-                  <input
-                    type="date"
-                    id="valid_to"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  <PersianDatePicker
                     value={formData.valid_to}
-                    onChange={(e) => setFormData({...formData, valid_to: e.target.value})}
+                    onChange={(date) => setFormData({...formData, valid_to: date || ''})}
+                    placeholder="تاریخ پایان اعتبار را انتخاب کنید"
+                    className="mt-1"
                   />
                 </div>
               </div>

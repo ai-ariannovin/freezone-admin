@@ -10,6 +10,9 @@ import { cn } from '@/lib/utils'
 // تنظیم moment برای استفاده از تقویم جلالی
 moment.loadPersian({ dialect: 'persian-modern' })
 
+// تنظیم locale فارسی برای react-datepicker
+import 'react-datepicker/dist/react-datepicker.css'
+
 interface PersianDatePickerProps {
   value?: string | Date
   onChange?: (date: string | null) => void
@@ -43,7 +46,7 @@ const PersianDatePicker = forwardRef<HTMLInputElement, PersianDatePickerProps>(
       setSelectedDate(date)
       if (onChange) {
         if (date) {
-          // تاریخ را به فرمت ISO string تبدیل کن (Gregorian)
+          // تاریخ را به فرمت ISO string تبدیل کن (Gregorian) برای ذخیره در دیتابیس
           onChange(date.toISOString().split('T')[0])
         } else {
           onChange(null)
@@ -55,20 +58,27 @@ const PersianDatePicker = forwardRef<HTMLInputElement, PersianDatePickerProps>(
       return moment(date).format('jYYYY/jMM/jDD')
     }
 
+    const formatDateForDisplay = (dateString: string) => {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      return moment(date).format('jYYYY/jMM/jDD')
+    }
+
     const CustomInput = forwardRef<HTMLInputElement, any>(({ value: inputValue, onClick, placeholder: inputPlaceholder }, inputRef) => (
       <Button
         ref={inputRef}
         variant="outline"
         onClick={onClick}
         className={cn(
-          "w-full justify-start text-left font-normal",
+          "w-full justify-start text-left font-normal persian-date-display",
           !inputValue && "text-muted-foreground",
           className
         )}
         disabled={disabled}
+        type="button"
       >
         <CalendarIcon className="mr-2 h-4 w-4" />
-        {inputValue ? formatDate(new Date(inputValue)) : inputPlaceholder}
+        {inputValue ? formatDateForDisplay(inputValue) : inputPlaceholder}
       </Button>
     ))
 
@@ -93,6 +103,19 @@ const PersianDatePicker = forwardRef<HTMLInputElement, PersianDatePickerProps>(
         id={id}
         name={name}
         ref={ref}
+        isRTL={true}
+        className="persian-datepicker"
+        wrapperClassName="w-full"
+        popperClassName="persian-datepicker-popper"
+        popperPlacement="bottom-start"
+        popperModifiers={[
+          {
+            name: 'offset',
+            options: {
+              offset: [0, 8],
+            },
+          },
+        ]}
       />
     )
   }
