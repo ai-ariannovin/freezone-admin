@@ -10,7 +10,8 @@ import {
   DocumentTextIcon,
   CalendarIcon,
   CheckCircleIcon,
-  XMarkIcon
+  XMarkIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
