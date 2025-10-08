@@ -115,6 +115,7 @@ export function DataTable<T extends Record<string, any>>({
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1) }}
                 className="pl-9 h-9 text-sm text-right"
+                data-testid="search-input"
               />
             </div>
           )}

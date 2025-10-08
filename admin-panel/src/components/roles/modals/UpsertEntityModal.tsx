@@ -56,28 +56,28 @@ export default function UpsertEntityModal({ open, onOpenChange, mode, activeTab,
           {activeTab !== 'categories' && (
             <div className="space-y-2">
               <Label htmlFor="name">{activeTab === 'roles' ? 'نام نقش *' : 'نام دسترسی *'}</Label>
-              <Input id="name" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} onInvalid={handleInvalid} onInput={handleInput} />
+              <Input id="name" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} onInvalid={handleInvalid} onInput={handleInput} data-testid="role-name" />
             </div>
           )}
 
           {activeTab !== 'categories' && (
             <div className="space-y-2">
               <Label htmlFor="slug">{activeTab === 'roles' ? 'شناسه نقش *' : 'شناسه دسترسی *'}</Label>
-              <Input id="slug" required placeholder={activeTab === 'permissions' ? 'view.users' : 'admin'} value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} onInvalid={handleInvalid} onInput={handleInput} />
+              <Input id="slug" required placeholder={activeTab === 'permissions' ? 'view.users' : 'admin'} value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} onInvalid={handleInvalid} onInput={handleInput} data-testid="role-slug" />
             </div>
           )}
 
           {activeTab !== 'categories' && (
             <div className="space-y-2">
               <Label htmlFor="description">توضیحات</Label>
-              <Input id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+              <Input id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} data-testid="role-description" />
             </div>
           )}
 
           {activeTab === 'roles' && (
             <div className="space-y-2">
               <Label htmlFor="level">سطح *</Label>
-              <Dropdown id="level" value={formData.level.toString()} onChange={(v) => setFormData({ ...formData, level: parseInt(v) })} required options={[{ value: '1', label: 'سطح ۱' }, { value: '2', label: 'سطح ۲' }, { value: '3', label: 'سطح ۳' }, { value: '4', label: 'سطح ۴' }, { value: '5', label: 'سطح ۵' }]} />
+              <Dropdown id="level" value={formData.level.toString()} onChange={(v) => setFormData({ ...formData, level: parseInt(v) })} required options={[{ value: '1', label: 'سطح ۱' }, { value: '2', label: 'سطح ۲' }, { value: '3', label: 'سطح ۳' }, { value: '4', label: 'سطح ۴' }, { value: '5', label: 'سطح ۵' }]} data-testid="role-level" />
             </div>
           )}
 
@@ -109,7 +109,7 @@ export default function UpsertEntityModal({ open, onOpenChange, mode, activeTab,
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onCancel}>انصراف</Button>
-            <Button type="submit">{mode === 'add' ? 'افزودن' : 'ویرایش'}</Button>
+            <Button type="submit" data-testid="save-role">{mode === 'add' ? 'افزودن' : 'ویرایش'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

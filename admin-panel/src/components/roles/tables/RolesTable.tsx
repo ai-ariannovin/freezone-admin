@@ -27,13 +27,13 @@ export default function RolesTable({ data, onAssign, onEdit, onDelete }: Props) 
         )},
         { key: 'actions', title: 'عملیات', sortable: false, render: (role: any) => (
           <div className="flex items-center space-x-2 space-x-reverse">
-            <Button variant="ghost" size="sm" onClick={() => onAssign(role)} title="انتساب دسترسی" className="text-amber-600 hover:text-amber-800">
+            <Button variant="ghost" size="sm" onClick={() => onAssign(role)} title="انتساب دسترسی" className="text-amber-600 hover:text-amber-800" data-testid={`assign-role-${role.id}`}>
               <KeyIcon className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onEdit(role)} title="ویرایش" className="text-indigo-600 hover:text-indigo-800">
+            <Button variant="ghost" size="sm" onClick={() => onEdit(role)} title="ویرایش" className="text-indigo-600 hover:text-indigo-800" data-testid={`edit-role-${role.id}`}>
               <PencilIcon className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onDelete(role.id)} title="حذف" className="text-red-600 hover:text-red-900">
+            <Button variant="ghost" size="sm" onClick={() => onDelete(role.id)} title="حذف" className="text-red-600 hover:text-red-900" data-testid={`delete-role-${role.id}`}>
               <TrashIcon className="h-4 w-4" />
             </Button>
           </div>

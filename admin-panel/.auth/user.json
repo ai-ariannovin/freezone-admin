@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "admin_token",
+          "value": "mock_token_1_1759672236664"
+        },
+        {
+          "name": "admin_user",
+          "value": "{\"id\":1,\"name\":\"مدیر سیستم\",\"phone\":\"09123456789\",\"email\":\"admin@freezone.ir\",\"user_type_id\":1,\"status_id\":1,\"permissions\":[\"view.users\",\"create.users\",\"view.roles\",\"edit.permissions\",\"view.licenses\",\"request.license\",\"manage.freezones\",\"link.business.freezone\"],\"roles\":[\"admin\"]}"
+        }
+      ]
+    }
+  ]
+}

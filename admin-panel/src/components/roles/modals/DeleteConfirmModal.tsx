@@ -29,7 +29,7 @@ export default function DeleteConfirmModal({ open, activeTab, name, loading, onC
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>انصراف</Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={!!loading}>{loading ? 'در حال حذف...' : 'حذف'}</Button>
+          <Button variant="destructive" onClick={onConfirm} disabled={!!loading} data-testid="confirm-delete">{loading ? 'در حال حذف...' : 'حذف'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

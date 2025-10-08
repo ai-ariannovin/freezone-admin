@@ -1,0 +1,192 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - heading "پنل ادمین" [level=1] [ref=e6]
+      - navigation [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - list [ref=e10]:
+              - listitem [ref=e11]:
+                - link "داشبورد" [ref=e12] [cursor=pointer]:
+                  - /url: /
+                  - img [ref=e13] [cursor=pointer]
+                  - text: داشبورد
+              - listitem [ref=e15]:
+                - link "کاربران" [ref=e16] [cursor=pointer]:
+                  - /url: /users
+                  - img [ref=e17] [cursor=pointer]
+                  - text: کاربران
+              - listitem [ref=e19]:
+                - link "نقش‌ها و مجوزها" [ref=e20] [cursor=pointer]:
+                  - /url: /roles
+                  - img [ref=e22] [cursor=pointer]
+                  - text: نقش‌ها و مجوزها
+              - listitem [ref=e24]:
+                - link "درختواره ISIC" [ref=e25] [cursor=pointer]:
+                  - /url: /isic
+                  - img [ref=e26] [cursor=pointer]
+                  - text: درختواره ISIC
+              - listitem [ref=e28]:
+                - link "کسب‌وکارها" [ref=e29] [cursor=pointer]:
+                  - /url: /businesses
+                  - img [ref=e30] [cursor=pointer]
+                  - text: کسب‌وکارها
+              - listitem [ref=e32]:
+                - link "مجوزها" [ref=e33] [cursor=pointer]:
+                  - /url: /licenses
+                  - img [ref=e34] [cursor=pointer]
+                  - text: مجوزها
+              - listitem [ref=e36]:
+                - link "کاربرگ‌ها" [ref=e37] [cursor=pointer]:
+                  - /url: /forms
+                  - img [ref=e38] [cursor=pointer]
+                  - text: کاربرگ‌ها
+              - listitem [ref=e40]:
+                - link "گزارش‌ها" [ref=e41] [cursor=pointer]:
+                  - /url: /reports
+                  - img [ref=e42] [cursor=pointer]
+                  - text: گزارش‌ها
+              - listitem [ref=e44]:
+                - link "لاگ‌ها" [ref=e45] [cursor=pointer]:
+                  - /url: /logs
+                  - img [ref=e46] [cursor=pointer]
+                  - text: لاگ‌ها
+              - listitem [ref=e48]:
+                - link "تنظیمات" [ref=e49] [cursor=pointer]:
+                  - /url: /settings
+                  - img [ref=e50] [cursor=pointer]
+                  - text: تنظیمات
+    - generic [ref=e52]:
+      - generic [ref=e56]:
+        - button "نمایش اعلان‌ها" [ref=e57]:
+          - generic [ref=e58]: نمایش اعلان‌ها
+          - img [ref=e59]
+        - button "باز کردن منوی کاربر ا مدیر سیستم" [ref=e63]:
+          - generic [ref=e64]: باز کردن منوی کاربر
+          - generic [ref=e66]: ا
+          - generic [ref=e67]:
+            - generic [ref=e69]: مدیر سیستم
+            - img [ref=e70]
+      - main [ref=e72]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - heading "مدیریت نقش‌ها و دسترسی‌ها" [level=1] [ref=e77]
+              - paragraph [ref=e78]: مدیریت نقش‌ها و دسترسی‌های کاربران
+            - button "افزودن نقش" [ref=e80]:
+              - img
+              - text: افزودن نقش
+          - generic [ref=e81]:
+            - tablist [ref=e82]:
+              - tab "نقش‌ها" [selected] [ref=e83]:
+                - img
+                - text: نقش‌ها
+              - tab "دسترسی‌ها" [ref=e84]:
+                - img
+                - text: دسترسی‌ها
+              - tab "گروه‌بندی دسترسی‌ها" [ref=e85]:
+                - img
+                - text: گروه‌بندی دسترسی‌ها
+            - tabpanel "نقش‌ها" [ref=e86]:
+              - generic [ref=e87]:
+                - generic [ref=e88]:
+                  - generic [ref=e89]: لیست نقش‌ها
+                  - generic [ref=e90]: مدیریت نقش‌ها و دسترسی‌های کاربران
+                - generic [ref=e92]:
+                  - generic [ref=e93]:
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: نمایش
+                      - combobox [ref=e96]:
+                        - generic: "10"
+                        - img
+                      - generic [ref=e97]: رکورد
+                    - generic [ref=e98]:
+                      - img [ref=e99]
+                      - textbox "جستجو…" [ref=e101]
+                  - table [ref=e104]:
+                    - rowgroup [ref=e105]:
+                      - row "ردیف نام نقش شناسه نقش (slug) سطح عملیات" [ref=e106]:
+                        - cell "ردیف" [ref=e107]
+                        - cell "نام نقش" [ref=e108]:
+                          - button "نام نقش" [ref=e109]:
+                            - generic [ref=e110]: نام نقش
+                            - img [ref=e111]
+                        - cell "شناسه نقش (slug)" [ref=e113]:
+                          - button "شناسه نقش (slug)" [ref=e114]:
+                            - generic [ref=e115]: شناسه نقش (slug)
+                            - img [ref=e116]
+                        - cell "سطح" [ref=e118]:
+                          - button "سطح" [ref=e119]:
+                            - generic [ref=e120]: سطح
+                            - img [ref=e121]
+                        - cell "عملیات" [ref=e123]:
+                          - generic [ref=e124]: عملیات
+                    - rowgroup [ref=e125]:
+                      - row "1 مدیر سیستم admin سطح 5" [ref=e126]:
+                        - cell "1" [ref=e127]
+                        - cell "مدیر سیستم" [ref=e128]
+                        - cell "admin" [ref=e129]
+                        - cell "سطح 5" [ref=e130]:
+                          - generic [ref=e131]: سطح 5
+                        - cell [ref=e132]:
+                          - generic [ref=e133]:
+                            - button "انتساب دسترسی" [ref=e134]:
+                              - img
+                            - button "ویرایش" [ref=e135]:
+                              - img
+                            - button "حذف" [ref=e136]:
+                              - img
+                      - row "2 کاربر حقیقی personuser سطح 1" [ref=e137]:
+                        - cell "2" [ref=e138]
+                        - cell "کاربر حقیقی" [ref=e139]
+                        - cell "personuser" [ref=e140]
+                        - cell "سطح 1" [ref=e141]:
+                          - generic [ref=e142]: سطح 1
+                        - cell [ref=e143]:
+                          - generic [ref=e144]:
+                            - button "انتساب دسترسی" [ref=e145]:
+                              - img
+                            - button "ویرایش" [ref=e146]:
+                              - img
+                            - button "حذف" [ref=e147]:
+                              - img
+                      - row "3 کاربر حقوقی companyuser سطح 2" [ref=e148]:
+                        - cell "3" [ref=e149]
+                        - cell "کاربر حقوقی" [ref=e150]
+                        - cell "companyuser" [ref=e151]
+                        - cell "سطح 2" [ref=e152]:
+                          - generic [ref=e153]: سطح 2
+                        - cell [ref=e154]:
+                          - generic [ref=e155]:
+                            - button "انتساب دسترسی" [ref=e156]:
+                              - img
+                            - button "ویرایش" [ref=e157]:
+                              - img
+                            - button "حذف" [ref=e158]:
+                              - img
+                      - row "4 مدیر منطقه آزاد freezonemanager سطح 3" [ref=e159]:
+                        - cell "4" [ref=e160]
+                        - cell "مدیر منطقه آزاد" [ref=e161]
+                        - cell "freezonemanager" [ref=e162]
+                        - cell "سطح 3" [ref=e163]:
+                          - generic [ref=e164]: سطح 3
+                        - cell [ref=e165]:
+                          - generic [ref=e166]:
+                            - button "انتساب دسترسی" [ref=e167]:
+                              - img
+                            - button "ویرایش" [ref=e168]:
+                              - img
+                            - button "حذف" [ref=e169]:
+                              - img
+                  - generic [ref=e170]:
+                    - generic [ref=e171]: نمایش 1 تا 4 از 4 رکورد
+                    - generic [ref=e172]:
+                      - button "قبلی" [disabled]
+                      - button "بعدی" [disabled]
+  - button "Open Next.js Dev Tools" [ref=e178] [cursor=pointer]:
+    - img [ref=e179] [cursor=pointer]
+  - alert [ref=e182]
+```

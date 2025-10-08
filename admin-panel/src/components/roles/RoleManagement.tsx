@@ -399,7 +399,7 @@ export default function RoleManagement() {
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <Button onClick={handleAdd}>
+          <Button onClick={handleAdd} data-testid="add-role">
             <PlusIcon className="h-4 w-4 ml-2" />
             {activeTab === 'roles' ? 'افزودن نقش' : 
              activeTab === 'permissions' ? 'افزودن دسترسی' : 
@@ -411,15 +411,15 @@ export default function RoleManagement() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'roles' | 'permissions' | 'categories')}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="roles" className="flex items-center">
+          <TabsTrigger value="roles" className="flex items-center" data-testid="roles-tab">
             <ShieldCheckIcon className="h-4 w-4 ml-2" />
             نقش‌ها
           </TabsTrigger>
-          <TabsTrigger value="permissions" className="flex items-center">
+          <TabsTrigger value="permissions" className="flex items-center" data-testid="permissions-tab">
             <KeyIcon className="h-4 w-4 ml-2" />
             دسترسی‌ها
           </TabsTrigger>
-          <TabsTrigger value="categories" className="flex items-center">
+          <TabsTrigger value="categories" className="flex items-center" data-testid="categories-tab">
             <UsersIcon className="h-4 w-4 ml-2" />
             گروه‌بندی دسترسی‌ها
           </TabsTrigger>

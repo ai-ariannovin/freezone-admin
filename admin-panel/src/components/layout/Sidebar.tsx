@@ -20,16 +20,16 @@ import {
 } from '@heroicons/react/24/outline'
 
 const navigation = [
-  { name: 'داشبورد', href: '/', icon: HomeIcon },
-  { name: 'کاربران', href: '/users', icon: UsersIcon },
-  { name: 'نقش‌ها و مجوزها', href: '/roles', icon: ShieldCheckIcon },
-  { name: 'درختواره ISIC', href: '/isic', icon: Squares2X2Icon },
-  { name: 'کسب‌وکارها', href: '/businesses', icon: BuildingOfficeIcon },
-  { name: 'مجوزها', href: '/licenses', icon: DocumentTextIcon },
-  { name: 'کاربرگ‌ها', href: '/forms', icon: ClipboardDocumentListIcon },
-  { name: 'گزارش‌ها', href: '/reports', icon: ChartBarIcon },
-  { name: 'لاگ‌ها', href: '/logs', icon: DocumentChartBarIcon },
-  { name: 'تنظیمات', href: '/settings', icon: CogIcon },
+  { name: 'داشبورد', href: '/', icon: HomeIcon, testId: 'dashboard-menu' },
+  { name: 'کاربران', href: '/users', icon: UsersIcon, testId: 'users-menu' },
+  { name: 'نقش‌ها و مجوزها', href: '/roles', icon: ShieldCheckIcon, testId: 'roles-menu' },
+  { name: 'درختواره ISIC', href: '/isic', icon: Squares2X2Icon, testId: 'isic-menu' },
+  { name: 'کسب‌وکارها', href: '/businesses', icon: BuildingOfficeIcon, testId: 'businesses-menu' },
+  { name: 'مجوزها', href: '/licenses', icon: DocumentTextIcon, testId: 'licenses-menu' },
+  { name: 'کاربرگ‌ها', href: '/forms', icon: ClipboardDocumentListIcon, testId: 'forms-menu' },
+  { name: 'گزارش‌ها', href: '/reports', icon: ChartBarIcon, testId: 'reports-menu' },
+  { name: 'لاگ‌ها', href: '/logs', icon: DocumentChartBarIcon, testId: 'logs-menu' },
+  { name: 'تنظیمات', href: '/settings', icon: CogIcon, testId: 'settings-menu' },
 ]
 
 interface SidebarProps {
@@ -101,6 +101,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                             <li key={item.name}>
                               <Link
                                 href={item.href}
+                                data-testid={item.testId}
+                                aria-current={pathname === item.href ? 'page' : undefined}
                                 className={cn(
                                   pathname === item.href
                                     ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100'
@@ -147,6 +149,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                     <li key={item.name}>
                       <Link
                         href={item.href}
+                        data-testid={item.testId}
+                        aria-current={pathname === item.href ? 'page' : undefined}
                         className={cn(
                           pathname === item.href
                             ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100'
